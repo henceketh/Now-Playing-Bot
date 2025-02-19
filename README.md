@@ -23,8 +23,8 @@ This project is a Telegram bot built using the [Telegraf](https://telegraf.js.or
 1. Clone the repository:
 
 ```bash
-git clone https://github.com/henceketh/Telegram-External-Track-Fetcher.git
-cd Telegram-External-Track-Fetcher
+git clone https://github.com/henceketh/Now-Playing-Bot.git
+cd Now-Playing-Bot
 ```
 
 2. Install dependencies:

@@ -39,9 +39,10 @@
 2. **Установка зависимостей**  
    Выполните команду:
    ```bash
-   npm install```
+   npm install
+   ```
 
-	3.	Настройка переменных окружения
+3. **Настройка переменных окружения**
 Создайте файл .env в корневой директории проекта и добавьте следующие переменные:
 SPOTIFY_CLIENT_ID=ваш_spotify_client_id
 SPOTIFY_CLIENT_SECRET=ваш_spotify_client_secret
@@ -50,7 +51,7 @@ SP_DC=ваш_sp_dc_cookie_value
 GENIUS_API_TOKEN=ваш_genius_api_token
 YOUTUBE_API_KEY=ваш_youtube_api_key
 
-	4.	Запуск сервера
+4. **Запуск сервера**
 Для запуска сервера выполните команду:
 node index.js
 

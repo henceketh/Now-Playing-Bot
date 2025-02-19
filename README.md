@@ -1,4 +1,4 @@
-# Spotify Track Fetcher Bot
+# Now-Playing-Bot
 
 This project is a Telegram bot built using the [Telegraf](https://telegraf.js.org/) framework that allows users to fetch and download Spotify tracks. The bot caches the downloaded tracks on the server and serves them via a simple HTTP server.
 

@@ -1,17 +1,25 @@
-const fs = require('fs').promises;
+const fs = require('node:fs/promises');
+const path = require('node:path');
+const { randomUUID } = require('node:crypto');
 
-/**
- * Ensures a directory exists. If not, creates it.
- * @param {string} dirPath 
- */
-const ensureDirectoryExists = async (dirPath) => {
+async function readJson(file, fallback) {
   try {
-    await fs.access(dirPath);
-  } catch (err) {
-    await fs.mkdir(dirPath, { recursive: true });
+    return JSON.parse(await fs.readFile(file, 'utf8'));
+  } catch (error) {
+    if (error.code === 'ENOENT') return fallback;
+    throw new Error(`Cannot read JSON file: ${file}`, { cause: error });
   }
-};
+}
 
-module.exports = {
-  ensureDirectoryExists,
-};
+async function writeJson(file, data) {
+  await fs.mkdir(path.dirname(file), { recursive: true });
+  const temporary = `${file}.${randomUUID()}.tmp`;
+  try {
+    await fs.writeFile(temporary, JSON.stringify(data, null, 2), { mode: 0o600 });
+    await fs.rename(temporary, file);
+  } finally {
+    await fs.rm(temporary, { force: true });
+  }
+}
+
+module.exports = { readJson, writeJson };

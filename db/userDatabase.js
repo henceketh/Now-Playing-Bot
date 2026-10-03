@@ -1,54 +1,35 @@
-const fs = require('fs').promises;
-const path = require('path');
+const { readJson, writeJson } = require('../utils/fileUtils');
 
-const USER_DB_PATH = path.join(__dirname, '..', process.env.USER_DB || 'users.json');
+function createUserDatabase(file) {
+  let pending = Promise.resolve();
 
-/**
- * Loads the user database. If it doesn't exist, initializes it.
- */
-const loadUserDatabase = async () => {
-  try {
-    await fs.access(USER_DB_PATH);
-  } catch (err) {
-    const initialData = { authorized_users: [] };
-    await fs.writeFile(USER_DB_PATH, JSON.stringify(initialData, null, 2));
+  async function load() {
+    const data = await readJson(file, { authorized_users: [] });
+    if (!Array.isArray(data.authorized_users) || data.authorized_users.some(id => !Number.isSafeInteger(id) || id <= 0)) {
+      throw new Error('Invalid user database');
+    }
+    return data;
   }
 
-  const data = await fs.readFile(USER_DB_PATH, 'utf8');
-  return JSON.parse(data);
-};
-
-/**
- * Saves the user database.
- * @param {Object} data 
- */
-const saveUserDatabase = async (data) => {
-  await fs.writeFile(USER_DB_PATH, JSON.stringify(data, null, 2));
-};
-
-/**
- * Checks if a user is authorized.
- * @param {number} userId 
- * @returns {Promise<boolean>}
- */
-const isUserAuthorized = async (userId) => {
-  const db = await loadUserDatabase();
-  return db.authorized_users.includes(userId);
-};
-
-/**
- * Authorizes a user by adding them to the database.
- * @param {number} userId 
- */
-const authorizeUser = async (userId) => {
-  const db = await loadUserDatabase();
-  if (!db.authorized_users.includes(userId)) {
-    db.authorized_users.push(userId);
-    await saveUserDatabase(db);
+  function authorizeUser(userId) {
+    if (!Number.isSafeInteger(userId) || userId <= 0) return Promise.reject(new Error('Invalid user ID'));
+    const operation = pending.then(async () => {
+      const data = await load();
+      if (!data.authorized_users.includes(userId)) {
+        data.authorized_users.push(userId);
+        await writeJson(file, data);
+      }
+    });
+    pending = operation.catch(() => {});
+    return operation;
   }
-};
 
-module.exports = {
-  isUserAuthorized,
-  authorizeUser,
-};
+  async function isUserAuthorized(userId) {
+    await pending;
+    return (await load()).authorized_users.includes(userId);
+  }
+
+  return { authorizeUser, isUserAuthorized };
+}
+
+module.exports = { createUserDatabase };
